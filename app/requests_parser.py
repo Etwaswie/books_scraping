@@ -8,18 +8,18 @@ import logging
 clickhouse_client = Client('127.0.0.1', port=9000)
 
 logging.basicConfig(
-    filename='db_insert.log',  # Имя файла для логов
-    level=logging.INFO,  # Уровень логирования
-    format='%(asctime)s - %(levelname)s - %(message)s'  # Формат сообщений
+    filename='db_insert.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-url = 'https://book24.ru/catalog/epos-folklor-aforizmy-1711/'
-pages = 53
+url = 'https://book24.ru/catalog/poeziya-1625/'
+pages = 221
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0'}
 
-with open("Эпос и фольклор.csv", mode="w", encoding='utf-8') as w_file:
+with open("Поэзия.csv", mode="w", encoding='utf-8') as w_file:
     file_writer = csv.writer(w_file, delimiter=";", lineterminator="\r")
     file_writer.writerow(["ISBN", "Название книги", "Автор", "Издательство", "Цена", "Рейтинг", "Количество оценок", "Раздел", 
                           "Подраздел", "Возрастное ограничение", "Переплет", "Бумага", "Год издания", "Количество страниц", "Описание"])
@@ -60,11 +60,9 @@ with open("Эпос и фольклор.csv", mode="w", encoding='utf-8') as w_f
             ISBN = ''
 
 
-            # Request the book page
             book_response = requests.get(f'https://book24.ru{href}', headers=headers)
             book_soup = BeautifulSoup(book_response.content, 'html.parser')
 
-            # Scrape book details
             try:
                 name = book_soup.select_one("h1.product-detail-page__title").get_text(strip=True)
                 
@@ -78,7 +76,6 @@ with open("Эпос и фольклор.csv", mode="w", encoding='utf-8') as w_f
             except Exception:
                 name = ''
 
-            # Получим все характеристики
             characteristics = book_soup.select("dl.product-characteristic__list div.product-characteristic__item")
 
             # Publisher
@@ -175,9 +172,7 @@ with open("Эпос и фольклор.csv", mode="w", encoding='utf-8') as w_f
             # Description
             try:
                 description_parts = book_soup.select("div.product-about.product-detail-page__product-about > div.product-about__text > p")
-                # Убираем переносы строк и удаляем последовательности точек, учитывая пробелы
                 if len(description_parts) == 1:
-                    # description = re.sub(r'\n+', ' ', re.sub(r'\. \.', '. ', re.sub(r'… \.', '. ', re.sub(r'\s*(\.\s*){2,}', '', description_parts[0].get_text())))).strip()
                     description = re.sub(r'\s+', ' ', re.sub(r'\n+', ' ', re.sub(r'\s*\.\s*', ' ', description_parts[0].get_text()))).strip()
 
                 else:
@@ -190,8 +185,6 @@ with open("Эпос и фольклор.csv", mode="w", encoding='utf-8') as w_f
 
             # Writing to CSV
             file_writer.writerow([ISBN, name, name_author, publisher, price_old, rating, amount_of_evaluation, chapter, sub_chapter, age_restriction, binding, paper, year, amount_of_pages, description])
-            # (["Название книги", "Автор", "Издательство", "Цена", "Рейтинг", "Количество оценок", "Раздел", 
-            # "Подраздел", "Возрастное ограничение", "Переплет", "Бумага", "Год издания", "Количество страниц", "Описание"])
 
             print(f'ISBN: {ISBN}')
             print(f'Название: {name}')
@@ -222,12 +215,9 @@ with open("Эпос и фольклор.csv", mode="w", encoding='utf-8') as w_f
                 )
                 logging.info(f"The entry was successfully added with the ID: {new_id}.")
             except errors.ServerException as e:
-                # Логируем ошибку точно так, как она поступила
                 error_message = '\n'.join(str(e).splitlines()[0:2]).replace(' Stack trace:', '')
                 logging.error(f"Server error: {error_message}")
-                # logging.error(f"Server error: {e.code}. {str(e)}")
                 
-                # Обработка конкретных случаев, например, дубликаты
                 if "duplicate" in str(e).lower():
                     logging.error("An entry already exists. The entry will not be added.")
                 
