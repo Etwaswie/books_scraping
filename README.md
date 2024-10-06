@@ -36,7 +36,7 @@ To run the scraping scripts, you will need to have Python installed on your mach
 
 1. Clone this repository:
    ```bash
-   git clone [https://github.com/etwaswie/book-scraping.git](https://github.com/Etwaswie/books_scraping.git)
+   git clone https://github.com/Etwaswie/books_scraping.git
    cd book-scraping
    
 2. Install the required packages:
