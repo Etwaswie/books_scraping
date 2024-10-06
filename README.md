@@ -47,10 +47,10 @@ To run the scraping scripts, you will need to have Python installed on your mach
    
     For Selenium:
     ```bash
-    python selenium_scraper.py
+    python selenium_parser.py
     ```
     
     For Requests:
     ```bash
-    python requests_scraper.py
+    python requests_parser.py
     ```
